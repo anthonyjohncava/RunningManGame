@@ -1,5 +1,6 @@
 package com.mygdx.game;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 
 public class GameScreen implements Screen {
@@ -11,7 +12,7 @@ public class GameScreen implements Screen {
 
     @Override
     public void show() {
-
+        Gdx.app.log("GameScreen: ","gameScreen show called");
     }
 
     @Override
