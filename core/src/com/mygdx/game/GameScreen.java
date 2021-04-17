@@ -38,8 +38,8 @@ public class GameScreen implements Screen {
     private OrthographicCamera camera;
 //    int frameIndex;
 
-    int characterX;
-    int characterY;
+    private static int characterX;                          // Character's X position
+    private static final int characterY = 410;              // Character's Y position
 
     public GameScreen(MyGdxGame game) {
         this.game = game;
@@ -92,8 +92,16 @@ public class GameScreen implements Screen {
         spriteBatch = new SpriteBatch();
 
         // Move the character
-        characterX = 10;
-        characterY = 410;
+        characterX = 0;
+        newGame();
+    }
+
+    private void newGame() {
+        // Starts background music
+        backgroundMusic.setLooping(true);
+        backgroundMusic.play();
+
+
     }
 
     @Override
@@ -104,17 +112,15 @@ public class GameScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        Gdx.gl.glClearColor(1, 1, 1, 1);
+        Gdx.gl.glClearColor(135/255f, 206/255f, 235/255f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         // Starts background music
         backgroundMusic.setLooping(true);
         backgroundMusic.play();
 
-
-
         // Moves the camera
-        camera.translate(0, 0);
+        camera.translate(10, 0);
         camera.update();
         // render tiledMap
         tiledMapRenderer.setView(camera);
