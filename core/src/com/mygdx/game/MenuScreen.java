@@ -26,6 +26,7 @@ public class MenuScreen implements Screen {
         skin = new Skin(Gdx.files.internal("skin/glassy-ui.json"));
         stage = new Stage();
 
+        // Start Game button
         final TextButton btn_start = new TextButton("Start Game", skin);
         btn_start.setWidth(500f);
         btn_start.setHeight(200f);
@@ -37,6 +38,7 @@ public class MenuScreen implements Screen {
             }
         });
 
+        // Exit Game button
         final TextButton btn_exit = new TextButton("Exit Game", skin);
         btn_exit.setWidth(500f);
         btn_exit.setHeight(200f);
@@ -51,8 +53,6 @@ public class MenuScreen implements Screen {
         stage.addActor(btn_start);
         stage.addActor(btn_exit);
         Gdx.input.setInputProcessor(stage);
-
-
     }
 
     @Override
@@ -65,6 +65,7 @@ public class MenuScreen implements Screen {
         Gdx.gl.glClearColor(1, 1, 1, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
+        // Rendered buttons
         batch.begin();
         stage.draw();
         batch.end();
@@ -72,26 +73,21 @@ public class MenuScreen implements Screen {
 
     @Override
     public void resize(int width, int height) {
-
     }
 
     @Override
     public void pause() {
-
     }
 
     @Override
     public void resume() {
-
     }
 
     @Override
     public void hide() {
-
     }
 
     @Override
     public void dispose() {
-
     }
 }
