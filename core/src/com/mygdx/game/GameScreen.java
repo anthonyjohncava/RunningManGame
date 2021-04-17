@@ -24,7 +24,7 @@ public class GameScreen implements Screen {
     private static final int FRAME_COLS = 4;                // Number of columns of the running spritesheet
     private static final int FRAME_ROWS = 2;                // Number of rows of the running spritesheet
     private static final int character_height = 210;        // Height of the character
-    private static final int character_width = 140;         // Width of the character
+    private final int character_width = 140;         // Width of the character
 
     // Variables for the running animation
     Animation runAnimation;		                            // Stores the array containing all of runFrames. It will also have the defined duration (in seconds) for each frame
@@ -36,10 +36,12 @@ public class GameScreen implements Screen {
     private TiledMap tiledMap;
     private OrthogonalTiledMapRenderer tiledMapRenderer;
     private OrthographicCamera camera;
+    private int cameraX;
 //    int frameIndex;
 
     private static int characterX;                          // Character's X position
-    private static final int characterY = 410;              // Character's Y position
+    private static int characterY = 410;                // Character's Y position
+    private final int jumpHeight = 70;
 
     public GameScreen(MyGdxGame game) {
         this.game = game;
@@ -120,7 +122,6 @@ public class GameScreen implements Screen {
         backgroundMusic.play();
 
         // Moves the camera
-        camera.translate(10, 0);
         camera.update();
         // render tiledMap
         tiledMapRenderer.setView(camera);
@@ -138,14 +139,37 @@ public class GameScreen implements Screen {
         spriteBatch.draw(currentFrame, characterX, characterY, character_width, character_height);
         spriteBatch.end();
 
-
-        characterX += 10;
-
+        // Moves the character and camera until the end of the tiledMap.
+        if (characterX <= 16400) {
+            characterX += 50;
+            camera.translate(50,0);
+        } else if (characterX >= 17500){
+            // Stops the character (out of screen)
+        } else {
+            characterX += 50;
+        }
     }
 
     private void update() {
 
 
+
+
+
+
+
+    }
+
+    private void jump() {
+        characterY += jumpHeight;
+
+
+    }
+
+    private void fall() {
+        if (characterY >= 210) {
+            characterY = 140;
+        }
     }
 
     @Override
