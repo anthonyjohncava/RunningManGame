@@ -4,14 +4,18 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TmxMapLoader;
+import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 
 public class GameScreen implements Screen {
     MyGdxGame game;
-    private Music backgroundMusic;
+    private Music backgroundMusic;                          // Background music while playing the game
     SpriteBatch spriteBatch;                                // Spritebatch for rendering
 
     // Main character variables
@@ -19,8 +23,8 @@ public class GameScreen implements Screen {
     TextureRegion[] runFrames;                              // Texture array for the running frames
     private static final int FRAME_COLS = 4;                // Number of columns of the running spritesheet
     private static final int FRAME_ROWS = 2;                // Number of rows of the running spritesheet
-    private static final int character_posX = 10;           // Position X of the character on the screen
-    private static final int character_posY =10;            // Position Y of the character on the screen
+    private static final int character_posX = 0;           // Position X of the character on the screen
+    private static final int character_posY = 0;            // Position Y of the character on the screen
     private static final int character_height = 300;        // Height of the character
     private static final int character_width = 300;         // Width of the character
 
@@ -30,6 +34,10 @@ public class GameScreen implements Screen {
 
     float stateTime;                                        // The time the program has been running.
 
+    // variables for the tiledMap
+    private TiledMap tiledMap;
+    private OrthogonalTiledMapRenderer tiledMapRenderer;
+    private OrthographicCamera camera;
 //    int frameIndex;
 
     public GameScreen(MyGdxGame game) {
@@ -62,7 +70,20 @@ public class GameScreen implements Screen {
         runAnimation = new Animation(0.033f, runFrames);
         // Running character------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+        // TiledMap---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        // Initialised the TiledMap and its renderer.
+        tiledMap = new TmxMapLoader().load("assets/level1.tmx");
+        tiledMapRenderer = new OrthogonalTiledMapRenderer(tiledMap);
 
+        // Camera
+        camera = new OrthographicCamera();
+        float w = Gdx.graphics.getWidth();
+        float h = Gdx.graphics.getHeight();
+        camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+
+
+
+        // TiledMap---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         // Initialises the stateTime
         stateTime = 0.0f;
@@ -86,6 +107,13 @@ public class GameScreen implements Screen {
         backgroundMusic.setLooping(true);
         backgroundMusic.play();
 
+
+        // render tiledMap
+        camera.translate(character_posX, character_posY);
+        camera.update();
+        tiledMapRenderer.setView(camera);
+        tiledMapRenderer.render();
+
         // Updates the stateTime using the deltaTime (to have the same time across all devices with different processors)
         stateTime += Gdx.graphics.getDeltaTime();
 
@@ -93,6 +121,7 @@ public class GameScreen implements Screen {
         currentFrame = (TextureRegion) runAnimation.getKeyFrame(stateTime, true);
 
         // Draws the character's currentframe on the screen, with a set position, and the size of the character.
+        spriteBatch.setProjectionMatrix(camera.combined);
         spriteBatch.begin();
         spriteBatch.draw(currentFrame, character_posX, character_posY, character_width, character_height);
         spriteBatch.end();
