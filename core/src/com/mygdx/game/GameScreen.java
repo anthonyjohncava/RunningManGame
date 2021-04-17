@@ -23,10 +23,8 @@ public class GameScreen implements Screen {
     TextureRegion[] runFrames;                              // Texture array for the running frames
     private static final int FRAME_COLS = 4;                // Number of columns of the running spritesheet
     private static final int FRAME_ROWS = 2;                // Number of rows of the running spritesheet
-    private static final int character_posX = 0;           // Position X of the character on the screen
-    private static final int character_posY = 0;            // Position Y of the character on the screen
-    private static final int character_height = 300;        // Height of the character
-    private static final int character_width = 300;         // Width of the character
+    private static final int character_height = 210;        // Height of the character
+    private static final int character_width = 140;         // Width of the character
 
     // Variables for the running animation
     Animation runAnimation;		                            // Stores the array containing all of runFrames. It will also have the defined duration (in seconds) for each frame
@@ -39,6 +37,9 @@ public class GameScreen implements Screen {
     private OrthogonalTiledMapRenderer tiledMapRenderer;
     private OrthographicCamera camera;
 //    int frameIndex;
+
+    int characterX;
+    int characterY;
 
     public GameScreen(MyGdxGame game) {
         this.game = game;
@@ -77,9 +78,8 @@ public class GameScreen implements Screen {
 
         // Camera
         camera = new OrthographicCamera();
-        float w = Gdx.graphics.getWidth();
-        float h = Gdx.graphics.getHeight();
-        camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        camera.setToOrtho(false, Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2);
+        camera.position.set(Gdx.graphics.getWidth()/4, Gdx.graphics.getHeight()/2+100,0);
 
 
 
@@ -90,6 +90,10 @@ public class GameScreen implements Screen {
 
         // initialises the spriteBatch
         spriteBatch = new SpriteBatch();
+
+        // Move the character
+        characterX = 10;
+        characterY = 410;
     }
 
     @Override
@@ -108,9 +112,11 @@ public class GameScreen implements Screen {
         backgroundMusic.play();
 
 
-        // render tiledMap
-        camera.translate(character_posX, character_posY);
+
+        // Moves the camera
+        camera.translate(0, 0);
         camera.update();
+        // render tiledMap
         tiledMapRenderer.setView(camera);
         tiledMapRenderer.render();
 
@@ -123,8 +129,17 @@ public class GameScreen implements Screen {
         // Draws the character's currentframe on the screen, with a set position, and the size of the character.
         spriteBatch.setProjectionMatrix(camera.combined);
         spriteBatch.begin();
-        spriteBatch.draw(currentFrame, character_posX, character_posY, character_width, character_height);
+        spriteBatch.draw(currentFrame, characterX, characterY, character_width, character_height);
         spriteBatch.end();
+
+
+        characterX += 10;
+
+    }
+
+    private void update() {
+
+
     }
 
     @Override
