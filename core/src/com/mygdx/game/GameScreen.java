@@ -289,13 +289,23 @@ public class GameScreen implements Screen {
 
 
 
-        // Jump character + animations
-        if (Gdx.input.isTouched() && state == "run") {
-            state = "jump";
-            currentFrame = jumpFrames[0];
-            jumpStart = characterX;
-            jumpSound.play();
+        int click_location = Gdx.input.getY();
+        Gdx.app.log("Clicked", String.valueOf(click_location));
+        if (click_location > 450) {
+            // slide
+        } else {
+            // jump
+            // Jump character + animations
+            if (Gdx.input.isTouched() && state == "run") {
+                state = "jump";
+                currentFrame = jumpFrames[0];
+                jumpStart = characterX;
+                jumpSound.play();
+            }
         }
+
+
+
         // before air
         if (state == "jump" && characterX == jumpStart + 15) {
             characterY += jumpHeight;
