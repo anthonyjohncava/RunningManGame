@@ -27,7 +27,7 @@ public class MenuScreen implements Screen {
         stage = new Stage();
 
         // Start Game button
-        final TextButton btn_start = new TextButton("Start Game", skin);
+        final TextButton btn_start = new TextButton("Play", skin);
         btn_start.setWidth(500f);
         btn_start.setHeight(200f);
         btn_start.setPosition(Gdx.graphics.getWidth() /2 - 300f, Gdx.graphics.getHeight()/2 + 100);
@@ -39,7 +39,7 @@ public class MenuScreen implements Screen {
         });
 
         // Exit Game button
-        final TextButton btn_exit = new TextButton("Exit Game", skin);
+        final TextButton btn_exit = new TextButton("Exit", skin);
         btn_exit.setWidth(500f);
         btn_exit.setHeight(200f);
         btn_exit.setPosition(Gdx.graphics.getWidth() /2 - 300f, Gdx.graphics.getHeight()/2 - 200f);

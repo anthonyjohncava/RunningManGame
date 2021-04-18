@@ -23,6 +23,8 @@ public class GameScreen implements Screen {
     MyGdxGame game;
     private Music backgroundMusic;                          // Background music while playing the game
     private Sound jumpSound;
+    private Sound deathSound;
+    private Sound winningSound;
     SpriteBatch spriteBatch;                                // Spritebatch for rendering
 
     // Main character variables
@@ -83,16 +85,39 @@ public class GameScreen implements Screen {
     private static final int FRAME_ROWS_DEAD = 1;                // Number of rows of the running spritesheet
     private static int deathPosition;
 
+    // Retry button
+    private Skin skin;
+    private Stage stage;
+
+
     public GameScreen(MyGdxGame game) {
         this.game = game;
     }
 
     public void create() {
 
+        skin = new Skin(Gdx.files.internal("skin/glassy-ui.json"));
+        stage = new Stage();
+
+        // Start Game button
+        final TextButton btn_retry = new TextButton("Retry", skin);
+        btn_retry.setWidth(500f);
+        btn_retry.setHeight(200f);
+        btn_retry.setPosition(characterX, characterY);
+        btn_retry.addListener(new ClickListener() {
+            @Override
+            public void clicked (InputEvent event, float x, float y) {
+                game.setScreen(MyGdxGame.gameScreen);
+            }
+        });
+        stage.addActor(btn_retry);
+
+
         // Loaded the background music
         backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("background_music.mp3"));
         jumpSound = Gdx.audio.newSound(Gdx.files.internal("bounce.mp3"));
-
+        deathSound = Gdx.audio.newSound(Gdx.files.internal("dead.mp3"));
+        winningSound = Gdx.audio.newSound(Gdx.files.internal("win.mp3"));
         // Running character------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         // Loaded the runnning spritesheet
         runningSheet = new Texture(Gdx.files.internal("assets/running.png"));
@@ -272,30 +297,6 @@ public class GameScreen implements Screen {
             state = "really dead";
         }
 
-
-
-
-        // Collision detection
-        // Determine the range of the character
-//        character_range_left = characterX;
-//        character_range_right = characterX + character_width;
-//
-//        slime_range_left = slimeX;
-//        slime_range_right = slimeX + 100;
-
-//        if (characterY + character_width >= slimeX) {
-//            Gdx.app.log("Hit!!!!! - Character: ","X is: " + String.valueOf(characterX) + "Y is: " + String.valueOf(characterY));
-//        }
-
-        // Collision detection is demonstrated as follows
-        /*
-         * |        |
-         * |        |
-         * |___C____|
-         *
-         *
-         */
-
         Gdx.app.log("Test - Character: ","X is: " + String.valueOf(characterX) + " X2 is: " + String.valueOf(characterX + character_width));
         Gdx.app.log("Test - Slime: ","X is: " + String.valueOf(slimeX) + " X2 is: " + String.valueOf(slimeX + 100));
 
@@ -320,6 +321,8 @@ public class GameScreen implements Screen {
             state = "dead";
             deathPosition = characterX;
             currentFrame = deadFrames[0];
+            deathSound.play();
+            stage.draw();
         }
 
 
@@ -334,8 +337,10 @@ public class GameScreen implements Screen {
             camera.translate(5,0);
         } else if (characterX >= 17500){
             // Stops the character (out of screen)
-//            backgroundMusic.stop();
+            backgroundMusic.stop();
             // Play winning music
+//            state = "win";
+            winningSound.play();
             game.setScreen(MyGdxGame.winningScreen);
 
         } else {
@@ -343,9 +348,6 @@ public class GameScreen implements Screen {
                 characterX += 5;
             }
         }
-
-//        Gdx.app.log("Hit - Character: ","X is: " + String.valueOf(characterX) + "Y is: " + String.valueOf(characterY));
-//        Gdx.app.log("Hit - Slime: ","X is: " + String.valueOf(slimeX) + " Y is: " + String.valueOf(slimeY));
 
         spriteBatch.draw(currentFrame, characterX, characterY, character_width, character_height);
 
@@ -355,7 +357,6 @@ public class GameScreen implements Screen {
         }
         slimeX -= 2;
         spriteBatch.draw(currentFrame_slime, slimeX, slimeY, 100, 100);
-
         spriteBatch.end();
     }
 
