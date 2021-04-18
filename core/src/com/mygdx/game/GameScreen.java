@@ -249,7 +249,7 @@ public class GameScreen implements Screen {
             @Override
             public void clicked (InputEvent event, float x, float y) {
                 backgroundMusic.stop();
-                game.setScreen(MyGdxGame.menuScreen);
+                game.setScreen(MyGdxGame.gameScreen);
             }
         });
         stage.addActor(btn_retry);
@@ -401,7 +401,8 @@ public class GameScreen implements Screen {
 
         // If the character wins, draws the retry button, but instead saying "Play again?".
         if (state == "win") {
-            btn_retry.setText("Play again?");
+            btn_retry.setText("Congratulations! Play again?");
+            btn_retry.setWidth(900f);
             stage.draw();
         }
 
@@ -467,17 +468,16 @@ public class GameScreen implements Screen {
         slimeX -= 2;
         spriteBatch.draw(currentFrame_slime, slimeX, slimeY, 100, 100);
 
-        // Spawn single slimes based on the character's position.
-        if (characterX % 1100 == 0 && (characterX <= 16400)) {
-            beesX = characterX + 1200;
+        // Spawn single bees based on the slime's position.
+        if (characterX % 1000 == 0 && (characterX <= 16400)) {
+            beesX = slimeX + 200;
         }
-        // Moves teh slimes slowly to the character.
+        // Moves the bees to the character.
         beesX -= 2;
         spriteBatch.draw(currentFrame_bees, beesX, beesY, 100, 100);
+
         spriteBatch.end();
     }
-
-
 
     @Override
     public void resize(int width, int height) {
