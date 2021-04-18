@@ -10,12 +10,15 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 
+/**
+ * This class implements the Main Menu Screen.
+ */
 public class MenuScreen implements Screen {
 
     MyGdxGame game;
-    private SpriteBatch batch;
-    private Skin skin;
-    private Stage stage;
+    private SpriteBatch batch;      // Will render the UI elements.
+    private Skin skin;              // The skin/style of the buttons.
+    private Stage stage;            // This will hold the button Actors.
 
     public MenuScreen(MyGdxGame game) {
         this.game = game;
@@ -26,19 +29,19 @@ public class MenuScreen implements Screen {
         skin = new Skin(Gdx.files.internal("skin/glassy-ui.json"));
         stage = new Stage();
 
-        // Start Game button
-        final TextButton btn_start = new TextButton("Play", skin);
-        btn_start.setWidth(500f);
-        btn_start.setHeight(200f);
-        btn_start.setPosition(Gdx.graphics.getWidth() /2 - 300f, Gdx.graphics.getHeight()/2 + 100);
-        btn_start.addListener(new ClickListener() {
+        // Play button. When pressed, it opens the GameScreen.
+        final TextButton btn_play = new TextButton("Play", skin);
+        btn_play.setWidth(500f);
+        btn_play.setHeight(200f);
+        btn_play.setPosition(Gdx.graphics.getWidth() /2 - 300f, Gdx.graphics.getHeight()/2 + 100);
+        btn_play.addListener(new ClickListener() {
             @Override
             public void clicked (InputEvent event, float x, float y) {
                 game.setScreen(MyGdxGame.gameScreen);
             }
         });
 
-        // Exit Game button
+        // Exit button. When pressed, it closes the app.
         final TextButton btn_exit = new TextButton("Exit", skin);
         btn_exit.setWidth(500f);
         btn_exit.setHeight(200f);
@@ -50,7 +53,8 @@ public class MenuScreen implements Screen {
             }
         });
 
-        stage.addActor(btn_start);
+        // Adds the play and exit buttons to the stage to be rendered.
+        stage.addActor(btn_play);
         stage.addActor(btn_exit);
         Gdx.input.setInputProcessor(stage);
     }
@@ -65,7 +69,7 @@ public class MenuScreen implements Screen {
         Gdx.gl.glClearColor(1, 1, 1, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        // Rendered buttons
+        // Renders buttons
         batch.begin();
         stage.draw();
         batch.end();
