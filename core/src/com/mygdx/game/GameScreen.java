@@ -29,8 +29,8 @@ public class GameScreen implements Screen {
     TextureRegion[] runFrames;                              // Texture array for the running frames
     private static final int FRAME_COLS = 4;                // Number of columns of the running spritesheet
     private static final int FRAME_ROWS = 2;                // Number of rows of the running spritesheet
-    private static final int character_height = 210;        // Height of the character
-    private final int character_width = 140;                // Width of the character
+    private static final int character_height = 280;        // Height of the character
+    private final int character_width = 210;                // Width of the character
     // Variables for the running animation
     Animation runAnimation;		                            // Stores the array containing all of runFrames. It will also have the defined duration (in seconds) for each frame
     TextureRegion currentFrame;                             // Current frame to display
@@ -46,7 +46,7 @@ public class GameScreen implements Screen {
 
     private static int characterX;                          // Character's X position
     private static int characterY;                // Character's Y position
-    private final int jumpHeight = 105;
+    private final int jumpHeight = 140;
 
     Texture slimeSheet;
     TextureRegion[] slimeFrames;
@@ -58,6 +58,22 @@ public class GameScreen implements Screen {
     private static int slimeY = 410;                          // Slime's X position
 
     private static int jumpStart;
+
+    // Jumping variables
+    Texture jumpSheet;                                   // Texture to hold the spritesheet
+    TextureRegion[] jumpFrames;                              // Texture array for the running frames
+    private static final int FRAME_COLS_JUMP = 3;                // Number of columns of the running spritesheet
+    private static final int FRAME_ROWS_JUMP = 1;                // Number of rows of the running spritesheet
+    // Variables for the running animation
+    Animation jumpAnimation;		                            // Stores the array containing all of runFrames. It will also have the defined duration (in seconds) for each frame
+
+    // Landing variables
+    Texture landSheet;                                   // Texture to hold the spritesheet
+    TextureRegion[] landFrames;                              // Texture array for the running frames
+    private static final int FRAME_COLS_LAND = 2;                // Number of columns of the running spritesheet
+    private static final int FRAME_ROWS_LAND = 1;                // Number of rows of the running spritesheet
+    // Variables for the running animation
+    Animation landAnimation;		                            // Stores the array containing all of runFrames. It will also have the defined duration (in seconds) for each frame
 
     public GameScreen(MyGdxGame game) {
         this.game = game;
@@ -103,6 +119,34 @@ public class GameScreen implements Screen {
         runAnimation_slime = new Animation(0.033f, slimeFrames);
         // Enemy1 ------------------------------------------------------------------------------------------------------
 
+        // Jump Animation -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        jumpSheet = new Texture(Gdx.files.internal("assets/jumping start.png"));
+        temp = TextureRegion.split(jumpSheet, jumpSheet.getWidth()/FRAME_COLS_JUMP, jumpSheet.getHeight()/FRAME_ROWS_JUMP);
+        jumpFrames = new TextureRegion[FRAME_ROWS_JUMP * FRAME_COLS_JUMP];
+        index = 0;
+        for (int i = 0; i < FRAME_ROWS_JUMP; i++) {
+            for (int j = 0; j < FRAME_COLS_JUMP; j++) {
+                jumpFrames[index++] = temp[i][j];    // i++ is post increment.
+            }
+        }
+        jumpAnimation = new Animation(0.05f, jumpFrames);
+        // Jump Animation -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        // Land Animation -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        landSheet = new Texture(Gdx.files.internal("assets/jumping end.png"));
+        temp = TextureRegion.split(landSheet, landSheet.getWidth()/FRAME_COLS_LAND, landSheet.getHeight()/FRAME_ROWS_LAND);
+        landFrames = new TextureRegion[FRAME_ROWS_LAND * FRAME_COLS_LAND];
+        index = 0;
+        for (int i = 0; i < FRAME_ROWS_LAND; i++) {
+            for (int j = 0; j < FRAME_COLS_LAND; j++) {
+                landFrames[index++] = temp[i][j];    // i++ is post increment.
+            }
+        }
+        landAnimation = new Animation(0.05f, landFrames);
+        // Land Animation -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
         // TiledMap---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         // Initialised the TiledMap and its renderer.
         tiledMap = new TmxMapLoader().load("assets/level1.tmx");
@@ -124,14 +168,14 @@ public class GameScreen implements Screen {
         // Move the character
         characterX = 0;
         newGame();
-        // Starts background music
-        backgroundMusic.setLooping(true);
-        backgroundMusic.play();
+
     }
 
     private void newGame() {
         characterY = 410;
-
+        // Starts background music
+        backgroundMusic.setLooping(true);
+        backgroundMusic.play();
     }
 
     @Override
@@ -145,10 +189,6 @@ public class GameScreen implements Screen {
         Gdx.gl.glClearColor(135/255f, 206/255f, 235/255f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        // Starts background music
-        backgroundMusic.setLooping(true);
-        backgroundMusic.play();
-
         // Moves the camera
         camera.update();
         // render tiledMap
@@ -159,8 +199,46 @@ public class GameScreen implements Screen {
         stateTime += Gdx.graphics.getDeltaTime();
 
         // Gets the currentFrame of the running animation
-        currentFrame = (TextureRegion) runAnimation.getKeyFrame(stateTime, true);
+
         currentFrame_slime = (TextureRegion) runAnimation_slime.getKeyFrame(stateTime, true);
+
+        if (state == "run") {
+            currentFrame = (TextureRegion) runAnimation.getKeyFrame(stateTime, true);
+        }
+        // Jump character
+        if (Gdx.input.isTouched() && state == "run") {
+            state = "jump";
+            currentFrame = jumpFrames[0];
+            jumpStart = characterX + 15;
+        }
+
+
+        // before air
+        if (state == "jump" && characterX == jumpStart + 25) {
+            currentFrame = jumpFrames[1];
+        }
+
+        // In air
+        if (state == "jump" && characterX == jumpStart + 50) {
+            characterY += jumpHeight;
+            currentFrame = jumpFrames[2];
+            state = "land";
+        }
+        //15
+        if (state == "land" && characterX == jumpStart + 100) {
+            currentFrame = landFrames[0];
+        }
+        if (state == "land" && characterX == jumpStart + 150) {
+            characterY -= jumpHeight;
+            currentFrame = landFrames[1];
+        }
+        if (state == "land" && characterX == jumpStart + 200) {
+            state = "run";
+        }
+
+
+
+
 
         // Draws the character's currentframe on the screen, with a set position, and the size of the character.
         spriteBatch.setProjectionMatrix(camera.combined);
@@ -189,29 +267,9 @@ public class GameScreen implements Screen {
             slimeX = characterX + 1200;
         }
         slimeX -= 2;
-        spriteBatch.draw(currentFrame_slime, slimeX, slimeY, character_width/2, character_height/2);
+        spriteBatch.draw(currentFrame_slime, slimeX, slimeY, 100, 100);
 
         spriteBatch.end();
-
-        // Jump character
-        if (Gdx.input.isTouched() && state == "run") {
-            state = "jump";
-            jumpStart = characterX + 15;
-        }
-
-        if (state == "jump" && characterX == jumpStart) {
-            characterY += jumpHeight;
-        }
-        if (state == "jump" && characterX == jumpStart + 80) {
-            characterY -= jumpHeight;
-            state = "run";
-        }
-    }
-
-    private void spawnEnemies() {
-        if (characterX == 500) {
-
-        }
     }
 
 
