@@ -80,16 +80,7 @@ public class GameScreen implements Screen {
     TextureRegion[] deadFrames;                              // Texture array for the running frames
     private static final int FRAME_COLS_DEAD = 3;                // Number of columns of the running spritesheet
     private static final int FRAME_ROWS_DEAD = 1;                // Number of rows of the running spritesheet
-    // Variables for the running animation
-    Animation deadAnimation;		                            // Stores the array containing all of runFrames. It will also have the defined duration (in seconds) for each frame
-
     private static int deathPosition;
-
-    private static int character_range_left;
-    private static int character_range_right;
-
-    private static int slime_range_left;
-    private static int slime_range_right;
 
     public GameScreen(MyGdxGame game) {
         this.game = game;
@@ -174,7 +165,6 @@ public class GameScreen implements Screen {
                 deadFrames[index++] = temp[i][j];    // i++ is post increment.
             }
         }
-        deadAnimation = new Animation(2, deadFrames);
         // Dead Animation -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         // TiledMap---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -204,8 +194,8 @@ public class GameScreen implements Screen {
     private void newGame() {
         characterY = 410;
         // Starts background music
-//        backgroundMusic.setLooping(true);
-//        backgroundMusic.play();
+        backgroundMusic.setLooping(true);
+        backgroundMusic.play();
     }
 
     @Override
@@ -242,15 +232,15 @@ public class GameScreen implements Screen {
         if (Gdx.input.isTouched() && state == "run") {
             state = "jump";
             currentFrame = jumpFrames[0];
-            jumpStart = characterX + 15;
+            jumpStart = characterX;
         }
         // before air
-        if (state == "jump" && characterX == jumpStart + 25) {
+        if (state == "jump" && characterX == jumpStart + 15) {
+            characterY += jumpHeight;
             currentFrame = jumpFrames[1];
         }
         // In air
         if (state == "jump" && characterX == jumpStart + 50) {
-            characterY += jumpHeight;
             currentFrame = jumpFrames[2];
             state = "land";
         }
@@ -306,15 +296,24 @@ public class GameScreen implements Screen {
         Gdx.app.log("Test - Character: ","X is: " + String.valueOf(characterX) + " X2 is: " + String.valueOf(characterX + character_width));
         Gdx.app.log("Test - Slime: ","X is: " + String.valueOf(slimeX) + " X2 is: " + String.valueOf(slimeX + 100));
 
-        int x = characterX;
-        int y = characterX + character_width;
+        int character_back = characterX;
+        int character_front = characterX + character_width;
 
-        int a = slimeX;
-        int b = slimeX + 100;
-        if ((slimeX >0) && ((y >= a + 40) && (y <= b))   ) {
-            Gdx.app.log("Hit!!! - Character: ","X is: " + String.valueOf(characterX) + " X2 is: " + String.valueOf(characterX + character_width));
-            Gdx.app.log("Hit!!! - Slime: ","X is: " + String.valueOf(slimeX) + " X2 is: " + String.valueOf(slimeX + 100));
+        int slime_front = slimeX;
+        int slime_back = slimeX + 100;
 
+        int character_bottom = characterY;
+
+        int slime_bottom = 410;
+        int slime_height = slime_bottom + 90;
+
+        if ((slimeX >0) &&
+                // If the front(right side) of the character hits the slime
+                (((character_front >= slime_front + 50) && (character_front <= slime_back + 50)) ||
+                // If the back side of the character hits the slime
+                ((character_back >= slime_front + 50) && (character_front <= slime_back + 50)) ) &&
+                // If the bottom part of the character is anywhere within the area of the slime
+                (character_bottom >= slime_bottom && character_bottom <= slime_height)) {
             state = "dead";
             deathPosition = characterX;
             currentFrame = deadFrames[0];
