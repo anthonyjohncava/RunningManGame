@@ -45,8 +45,8 @@ public class GameScreen implements Screen {
     private static String state = "run";
 
     private static int characterX;                          // Character's X position
-    private static int characterY = 410;                // Character's Y position
-    private final int jumpHeight = 70;
+    private static int characterY;                // Character's Y position
+    private final int jumpHeight = 105;
 
     Texture slimeSheet;
     TextureRegion[] slimeFrames;
@@ -55,6 +55,9 @@ public class GameScreen implements Screen {
     Animation runAnimation_slime;		                            // Stores the array containing all of runFrames. It will also have the defined duration (in seconds) for each frame
     TextureRegion currentFrame_slime;
     private static int slimeX;                          // Slime's X position
+    private static int slimeY = 410;                          // Slime's X position
+
+    private static int jumpStart;
 
     public GameScreen(MyGdxGame game) {
         this.game = game;
@@ -121,12 +124,13 @@ public class GameScreen implements Screen {
         // Move the character
         characterX = 0;
         newGame();
-    }
-
-    private void newGame() {
         // Starts background music
         backgroundMusic.setLooping(true);
         backgroundMusic.play();
+    }
+
+    private void newGame() {
+        characterY = 410;
 
     }
 
@@ -168,6 +172,7 @@ public class GameScreen implements Screen {
             camera.translate(5,0);
         } else if (characterX >= 17500){
             // Stops the character (out of screen)
+//            backgroundMusic.stop();
             // Play winning music
             game.setScreen(MyGdxGame.winningScreen);
 
@@ -184,9 +189,23 @@ public class GameScreen implements Screen {
             slimeX = characterX + 1200;
         }
         slimeX -= 2;
-        spriteBatch.draw(currentFrame_slime, slimeX, characterY, character_width/2, character_height/2);
+        spriteBatch.draw(currentFrame_slime, slimeX, slimeY, character_width/2, character_height/2);
 
         spriteBatch.end();
+
+        // Jump character
+        if (Gdx.input.isTouched() && state == "run") {
+            state = "jump";
+            jumpStart = characterX + 15;
+        }
+
+        if (state == "jump" && characterX == jumpStart) {
+            characterY += jumpHeight;
+        }
+        if (state == "jump" && characterX == jumpStart + 80) {
+            characterY -= jumpHeight;
+            state = "run";
+        }
     }
 
     private void spawnEnemies() {
