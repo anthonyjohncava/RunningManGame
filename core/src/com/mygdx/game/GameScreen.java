@@ -53,6 +53,7 @@ public class GameScreen implements Screen {
     private static final int FRAME_ROWS_SLIME = 1;                // Number of rows of the slime spritesheet
     Animation runAnimation_slime;		                            // Stores the array containing all of runFrames. It will also have the defined duration (in seconds) for each frame
     TextureRegion currentFrame_slime;
+    private static int slimeX;                          // Slime's X position
 
     public GameScreen(MyGdxGame game) {
         this.game = game;
@@ -125,6 +126,7 @@ public class GameScreen implements Screen {
         // Starts background music
         backgroundMusic.setLooping(true);
         backgroundMusic.play();
+
     }
 
     @Override
@@ -161,19 +163,33 @@ public class GameScreen implements Screen {
 
         // Moves the character and camera until the end of the tiledMap.
         if (characterX <= 16400) {
-            characterX += 10;
-            camera.translate(10,0);
+            characterX += 5;
+            camera.translate(5,0);
         } else if (characterX >= 17500){
             // Stops the character (out of screen)
+            // Play winning music
         } else {
-            characterX += 10;
+            characterX += 5;
         }
 
-        Gdx.app.log("State: ",state + " : " + String.valueOf(stateTime));
+        Gdx.app.log("State: ",String.valueOf(characterX));
 
         spriteBatch.draw(currentFrame, characterX, characterY, character_width, character_height);
-        spriteBatch.draw(currentFrame_slime, characterX, characterY, character_width/2, character_height/2);
+
+        // Spawn single slimes
+        if (characterX % 900 == 0 && (characterX <= 16400)) {
+            slimeX = characterX + 1200;
+        }
+        slimeX -= 2;
+        spriteBatch.draw(currentFrame_slime, slimeX, characterY, character_width/2, character_height/2);
+
         spriteBatch.end();
+    }
+
+    private void spawnEnemies() {
+        if (characterX == 500) {
+
+        }
     }
 
 
