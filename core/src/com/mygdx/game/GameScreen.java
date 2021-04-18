@@ -103,14 +103,15 @@ public class GameScreen implements Screen {
         final TextButton btn_retry = new TextButton("Retry", skin);
         btn_retry.setWidth(500f);
         btn_retry.setHeight(200f);
-        btn_retry.setPosition(characterX, characterY);
+        btn_retry.setPosition(deathPosition + 600, characterY + 200);
         btn_retry.addListener(new ClickListener() {
             @Override
             public void clicked (InputEvent event, float x, float y) {
-                game.setScreen(MyGdxGame.gameScreen);
+                game.setScreen(MyGdxGame.menuScreen);
             }
         });
         stage.addActor(btn_retry);
+        Gdx.input.setInputProcessor(stage);
 
 
         // Loaded the background music
@@ -296,6 +297,12 @@ public class GameScreen implements Screen {
             currentFrame = deadFrames[2];
             state = "really dead";
         }
+        if (state == "really dead") {
+            stage.draw();
+
+            backgroundMusic.stop();
+        }
+
 
         Gdx.app.log("Test - Character: ","X is: " + String.valueOf(characterX) + " X2 is: " + String.valueOf(characterX + character_width));
         Gdx.app.log("Test - Slime: ","X is: " + String.valueOf(slimeX) + " X2 is: " + String.valueOf(slimeX + 100));
@@ -322,7 +329,6 @@ public class GameScreen implements Screen {
             deathPosition = characterX;
             currentFrame = deadFrames[0];
             deathSound.play();
-            stage.draw();
         }
 
 
