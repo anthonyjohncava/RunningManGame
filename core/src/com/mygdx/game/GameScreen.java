@@ -4,10 +4,12 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.tiled.TiledMap;
@@ -15,9 +17,13 @@ import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.badlogic.gdx.utils.Align;
 
 public class GameScreen implements Screen {
     MyGdxGame game;
@@ -39,6 +45,7 @@ public class GameScreen implements Screen {
     TextureRegion currentFrame;                             // Current frame to display
 
     float stateTime;                                        // The time the program has been running.
+
 
     // variables for the tiledMap
     private TiledMap tiledMap;
@@ -85,34 +92,26 @@ public class GameScreen implements Screen {
     private static final int FRAME_ROWS_DEAD = 1;                // Number of rows of the running spritesheet
     private static int deathPosition;
 
+    // Bees variables
+    Texture beesSheet;                                   // Texture to hold the spritesheet
+    TextureRegion[] beesFrames;                              // Texture array for the running frames
+    private static final int FRAME_COLS_BEES = 2;                // Number of columns of the running spritesheet
+    private static final int FRAME_ROWS_BEES = 1;                // Number of rows of the running spritesheet
+    Animation runAnimation_bees;		                            // Stores the array containing all of runFrames. It will also have the defined duration (in seconds) for each frame
+    TextureRegion currentFrame_bees;
+    private static int beesX;                          // Slime's X position
+    private static int beesY = 410;                          // Slime's X position
+
     // Retry button
     private Skin skin;
     private Stage stage;
-
+    private TextButton btn_retry;
 
     public GameScreen(MyGdxGame game) {
         this.game = game;
     }
 
     public void create() {
-
-        skin = new Skin(Gdx.files.internal("skin/glassy-ui.json"));
-        stage = new Stage();
-
-        // Start Game button
-        final TextButton btn_retry = new TextButton("Retry", skin);
-        btn_retry.setWidth(500f);
-        btn_retry.setHeight(200f);
-        btn_retry.setPosition(deathPosition + 600, characterY + 200);
-        btn_retry.addListener(new ClickListener() {
-            @Override
-            public void clicked (InputEvent event, float x, float y) {
-                game.setScreen(MyGdxGame.menuScreen);
-            }
-        });
-        stage.addActor(btn_retry);
-        Gdx.input.setInputProcessor(stage);
-
 
         // Loaded the background music
         backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("background_music.mp3"));
@@ -153,6 +152,19 @@ public class GameScreen implements Screen {
         }
         runAnimation_slime = new Animation(0.033f, slimeFrames);
         // Enemy1 ------------------------------------------------------------------------------------------------------
+
+        // Enemy2 ------------------------------------------------------------------------------------------------------
+        beesSheet = new Texture(Gdx.files.internal("assets/bee.png"));
+        temp = TextureRegion.split(beesSheet, beesSheet.getWidth()/FRAME_COLS_BEES, beesSheet.getHeight()/FRAME_ROWS_BEES);
+        beesFrames = new TextureRegion[FRAME_COLS_BEES * FRAME_ROWS_BEES];
+        index = 0;
+        for (int i = 0; i < FRAME_ROWS_BEES; i++) {
+            for (int j = 0; j < FRAME_COLS_BEES; j++) {
+                beesFrames[index++] = temp[i][j];    // i++ is post increment.
+            }
+        }
+        runAnimation_bees = new Animation(0.033f, beesFrames);
+        // Enemy2 ------------------------------------------------------------------------------------------------------
 
         // Jump Animation -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -207,6 +219,26 @@ public class GameScreen implements Screen {
 
         // TiledMap---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+
+        skin = new Skin(Gdx.files.internal("skin/glassy-ui.json"));
+        stage = new Stage();
+
+        // Retry button
+        btn_retry = new TextButton("Try again?", skin);
+        btn_retry.setWidth(500f);
+        btn_retry.setHeight(200f);
+        btn_retry.setPosition(camera.position.x, camera.position.y);
+        btn_retry.addListener(new ClickListener() {
+            @Override
+            public void clicked (InputEvent event, float x, float y) {
+                backgroundMusic.stop();
+                game.setScreen(MyGdxGame.menuScreen);
+            }
+        });
+        stage.addActor(btn_retry);
+        Gdx.input.setInputProcessor(stage);
+
+
         // Initialises the stateTime
         stateTime = 0.0f;
 
@@ -249,6 +281,7 @@ public class GameScreen implements Screen {
         // Gets the currentFrame of the running animation
 
         currentFrame_slime = (TextureRegion) runAnimation_slime.getKeyFrame(stateTime, true);
+        currentFrame_bees = (TextureRegion) runAnimation_bees.getKeyFrame(stateTime, true);
 
         if (state == "run") {
             currentFrame = (TextureRegion) runAnimation.getKeyFrame(stateTime, true);
@@ -299,13 +332,15 @@ public class GameScreen implements Screen {
         }
         if (state == "really dead") {
             stage.draw();
-
-            backgroundMusic.stop();
+        }
+        if (state == "win") {
+            btn_retry.setText("Play again?");
+            stage.draw();
         }
 
-
-        Gdx.app.log("Test - Character: ","X is: " + String.valueOf(characterX) + " X2 is: " + String.valueOf(characterX + character_width));
-        Gdx.app.log("Test - Slime: ","X is: " + String.valueOf(slimeX) + " X2 is: " + String.valueOf(slimeX + 100));
+//        Gdx.app.log("Test - Character: ","X is: " + String.valueOf(characterX) + " X2 is: " + String.valueOf(characterX + character_width));
+//        Gdx.app.log("Test - Slime: ","X is: " + String.valueOf(slimeX) + " X2 is: " + String.valueOf(slimeX + 100));
+//        Gdx.app.log("Camera", String.valueOf(camera.position.x));
 
         int character_back = characterX;
         int character_front = characterX + character_width;
@@ -337,18 +372,17 @@ public class GameScreen implements Screen {
         spriteBatch.setProjectionMatrix(camera.combined);
         spriteBatch.begin();
 
+
+
         // Moves the character and camera until the end of the tiledMap.
         if (characterX <= 16400 && state != "really dead") {
             characterX += 5;
             camera.translate(5,0);
-        } else if (characterX >= 17500){
-            // Stops the character (out of screen)
-            backgroundMusic.stop();
-            // Play winning music
-//            state = "win";
+        } else if (characterX >= 17500 && characterX <= 17600){
             winningSound.play();
-            game.setScreen(MyGdxGame.winningScreen);
-
+            state = "win";
+            characterX = 17601;
+            stage.draw();
         } else {
             if (state != "really dead") {
                 characterX += 5;
@@ -363,6 +397,14 @@ public class GameScreen implements Screen {
         }
         slimeX -= 2;
         spriteBatch.draw(currentFrame_slime, slimeX, slimeY, 100, 100);
+
+        // Spawn single bees
+        if (characterX % 1100 == 0 && (characterX <= 16400)) {
+            beesX = characterX + 1200;
+        }
+        beesX -= 2;
+        spriteBatch.draw(currentFrame_bees, beesX, 450, 100, 100);
+
         spriteBatch.end();
     }
 
