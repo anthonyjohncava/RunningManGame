@@ -38,7 +38,7 @@ public class GameScreen implements Screen {
     TextureRegion[] runFrames;                              // Texture array for the running frames
     private static final int FRAME_COLS = 4;                // Number of columns of the running spritesheet
     private static final int FRAME_ROWS = 2;                // Number of rows of the running spritesheet
-    private static final int character_height = 280;        // Height of the character
+    private static int character_height = 280;        // Height of the character
     private final int character_width = 210;                // Width of the character
     // Variables for the running animation
     Animation runAnimation;		                            // Stores the array containing all of runFrames. It will also have the defined duration (in seconds) for each frame
@@ -57,6 +57,7 @@ public class GameScreen implements Screen {
     private static int characterX;                          // Character's X position
     private static int characterY;                // Character's Y position
     private final int jumpHeight = 140;
+    private final int slideHeight = 140;
 
     Texture slimeSheet;
     TextureRegion[] slimeFrames;
@@ -68,6 +69,7 @@ public class GameScreen implements Screen {
     private static int slimeY = 410;                          // Slime's X position
 
     private static int jumpStart;
+    private static int slideStart;
 
     // Jumping variables
     Texture jumpSheet;                                   // Texture to hold the spritesheet
@@ -84,6 +86,19 @@ public class GameScreen implements Screen {
     private static final int FRAME_ROWS_LAND = 1;                // Number of rows of the running spritesheet
     // Variables for the running animation
     Animation landAnimation;		                            // Stores the array containing all of runFrames. It will also have the defined duration (in seconds) for each frame
+
+    // Sliding start variables
+    Texture slideSheet;                                   // Texture to hold the spritesheet
+    TextureRegion[] slideFrames;                              // Texture array for the running frames
+    private static final int FRAME_COLS_SLIDE = 2;                // Number of columns of the running spritesheet
+    private static final int FRAME_ROWS_SLIDE = 1;                // Number of rows of the running spritesheet
+
+    // Rising variables
+    Texture riseSheet;                                   // Texture to hold the spritesheet
+    TextureRegion[] riseFrames;                              // Texture array for the running frames
+    private static final int FRAME_COLS_RISE = 1;                // Number of columns of the running spritesheet
+    private static final int FRAME_ROWS_RISE = 1;                // Number of rows of the running spritesheet
+
 
     // Deading variables
     Texture deadSheet;                                   // Texture to hold the spritesheet
@@ -165,6 +180,31 @@ public class GameScreen implements Screen {
         }
         runAnimation_bees = new Animation(0.033f, beesFrames);
         // Enemy2 ------------------------------------------------------------------------------------------------------
+
+        // Slide Animation -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        slideSheet = new Texture(Gdx.files.internal("assets/sliding start.png"));
+        temp = TextureRegion.split(slideSheet, slideSheet.getWidth()/FRAME_COLS_SLIDE, slideSheet.getHeight()/FRAME_ROWS_SLIDE);
+        slideFrames = new TextureRegion[FRAME_ROWS_SLIDE * FRAME_COLS_SLIDE];
+        index = 0;
+        for (int i = 0; i < FRAME_ROWS_SLIDE; i++) {
+            for (int j = 0; j < FRAME_COLS_SLIDE; j++) {
+                slideFrames[index++] = temp[i][j];    // i++ is post increment.
+            }
+        }
+        // Slide Animation -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        // Rising Animation -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        riseSheet = new Texture(Gdx.files.internal("assets/sliding end.png"));
+        temp = TextureRegion.split(riseSheet, riseSheet.getWidth()/FRAME_COLS_RISE, riseSheet.getHeight()/FRAME_ROWS_RISE);
+        riseFrames = new TextureRegion[FRAME_ROWS_RISE * FRAME_COLS_RISE];
+        index = 0;
+        for (int i = 0; i < FRAME_ROWS_RISE; i++) {
+            for (int j = 0; j < FRAME_COLS_RISE; j++) {
+                riseFrames[index++] = temp[i][j];    // i++ is post increment.
+            }
+        }
+        // Rising Animation -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         // Jump Animation -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -292,7 +332,13 @@ public class GameScreen implements Screen {
         int click_location = Gdx.input.getY();
         Gdx.app.log("Clicked", String.valueOf(click_location));
         if (click_location > 450) {
-            // slide
+//             slide
+            if (Gdx.input.isTouched() && state == "run") {
+                state = "slide";
+                currentFrame = slideFrames[0];
+                slideStart = characterX;
+                jumpSound.play();
+            }
         } else {
             // jump
             // Jump character + animations
@@ -304,8 +350,27 @@ public class GameScreen implements Screen {
             }
         }
 
+        // SLIDE ANIMATIONS
+        if (state == "slide" && characterX == slideStart + 15) {
+//            characterY -= jumpHeight;
+            character_height -= 70;
+            currentFrame = slideFrames[1];
+        }
+
+        if (state == "slide" && characterX == slideStart + 50) {
+//            currentFrame = riseFrames[0];
+            state = "rise";
+        }
+        //15
+        if (state == "rise" && characterX == slideStart + 150) {
+            currentFrame = riseFrames[0];
+//            characterY -= slideHeight;
+            character_height += 70;
+            state = "run";
+        }
 
 
+        // JUMP ANIMATION
         // before air
         if (state == "jump" && characterX == jumpStart + 15) {
             characterY += jumpHeight;
@@ -327,7 +392,6 @@ public class GameScreen implements Screen {
         if (state == "land" && characterX == jumpStart + 200) {
             state = "run";
         }
-
 
         // Dead animation
         if (state == "dead" && characterX == deathPosition + 30) {
