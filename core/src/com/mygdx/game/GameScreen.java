@@ -468,9 +468,9 @@ public class GameScreen implements Screen {
         slimeX -= 2;
         spriteBatch.draw(currentFrame_slime, slimeX, slimeY, 100, 100);
 
-        // Spawn single bees based on the slime's position.
+        // Spawn single bees based on the player's position.
         if (characterX % 1000 == 0 && (characterX <= 16400)) {
-            beesX = slimeX + 200;
+            beesX = characterX + 1200;
         }
         // Moves the bees to the character.
         beesX -= 2;
