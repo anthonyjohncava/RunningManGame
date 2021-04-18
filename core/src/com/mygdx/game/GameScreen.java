@@ -3,6 +3,7 @@ package com.mygdx.game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -168,6 +169,8 @@ public class GameScreen implements Screen {
         } else if (characterX >= 17500){
             // Stops the character (out of screen)
             // Play winning music
+            game.setScreen(MyGdxGame.winningScreen);
+
         } else {
             characterX += 5;
         }

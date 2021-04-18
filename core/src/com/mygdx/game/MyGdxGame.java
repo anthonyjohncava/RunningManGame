@@ -12,11 +12,15 @@ public class MyGdxGame extends Game implements ApplicationListener {
 	// The class with the game
 	public static GameScreen gameScreen;
 
+	// The class with the winnning screen
+	public static WinningScreen winningScreen;
+
 	@Override
 	public void create () {
 		Gdx.app.log("MyGdxGame: ", "create");
 		gameScreen = new GameScreen(this);
 		menuScreen = new MenuScreen(this);
+		winningScreen = new WinningScreen(this);
 		Gdx.app.log("MyGdxGame: ", "about to change screen to menuScreen");
 		// Change screens to the menu
 		setScreen(menuScreen);
