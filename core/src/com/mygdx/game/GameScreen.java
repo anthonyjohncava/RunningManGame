@@ -75,6 +75,22 @@ public class GameScreen implements Screen {
     // Variables for the running animation
     Animation landAnimation;		                            // Stores the array containing all of runFrames. It will also have the defined duration (in seconds) for each frame
 
+    // Deading variables
+    Texture deadSheet;                                   // Texture to hold the spritesheet
+    TextureRegion[] deadFrames;                              // Texture array for the running frames
+    private static final int FRAME_COLS_DEAD = 3;                // Number of columns of the running spritesheet
+    private static final int FRAME_ROWS_DEAD = 1;                // Number of rows of the running spritesheet
+    // Variables for the running animation
+    Animation deadAnimation;		                            // Stores the array containing all of runFrames. It will also have the defined duration (in seconds) for each frame
+
+    private static int deathPosition;
+
+    private static int character_range_left;
+    private static int character_range_right;
+
+    private static int slime_range_left;
+    private static int slime_range_right;
+
     public GameScreen(MyGdxGame game) {
         this.game = game;
     }
@@ -147,6 +163,20 @@ public class GameScreen implements Screen {
         landAnimation = new Animation(0.05f, landFrames);
         // Land Animation -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+        // Dead Animation -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        deadSheet = new Texture(Gdx.files.internal("assets/deading.png"));
+        temp = TextureRegion.split(deadSheet, deadSheet.getWidth()/FRAME_COLS_DEAD, deadSheet.getHeight()/FRAME_ROWS_DEAD);
+        deadFrames = new TextureRegion[FRAME_ROWS_DEAD * FRAME_COLS_DEAD];
+        index = 0;
+        for (int i = 0; i < FRAME_ROWS_DEAD; i++) {
+            for (int j = 0; j < FRAME_COLS_DEAD; j++) {
+                deadFrames[index++] = temp[i][j];    // i++ is post increment.
+            }
+        }
+        deadAnimation = new Animation(2, deadFrames);
+        // Dead Animation -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
         // TiledMap---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         // Initialised the TiledMap and its renderer.
         tiledMap = new TmxMapLoader().load("assets/level1.tmx");
@@ -174,8 +204,8 @@ public class GameScreen implements Screen {
     private void newGame() {
         characterY = 410;
         // Starts background music
-        backgroundMusic.setLooping(true);
-        backgroundMusic.play();
+//        backgroundMusic.setLooping(true);
+//        backgroundMusic.play();
     }
 
     @Override
@@ -205,19 +235,19 @@ public class GameScreen implements Screen {
         if (state == "run") {
             currentFrame = (TextureRegion) runAnimation.getKeyFrame(stateTime, true);
         }
-        // Jump character
+
+
+
+        // Jump character + animations
         if (Gdx.input.isTouched() && state == "run") {
             state = "jump";
             currentFrame = jumpFrames[0];
             jumpStart = characterX + 15;
         }
-
-
         // before air
         if (state == "jump" && characterX == jumpStart + 25) {
             currentFrame = jumpFrames[1];
         }
-
         // In air
         if (state == "jump" && characterX == jumpStart + 50) {
             characterY += jumpHeight;
@@ -237,6 +267,58 @@ public class GameScreen implements Screen {
         }
 
 
+        // Dead animation
+        if (state == "dead" && characterX == deathPosition + 30) {
+            currentFrame = deadFrames[1];
+            characterY = 410;
+        }
+
+        // Dead animation
+        if (state == "dead" && characterX == deathPosition + 60) {
+            currentFrame = deadFrames[2];
+            state = "really dead";
+        }
+
+
+
+
+        // Collision detection
+        // Determine the range of the character
+//        character_range_left = characterX;
+//        character_range_right = characterX + character_width;
+//
+//        slime_range_left = slimeX;
+//        slime_range_right = slimeX + 100;
+
+//        if (characterY + character_width >= slimeX) {
+//            Gdx.app.log("Hit!!!!! - Character: ","X is: " + String.valueOf(characterX) + "Y is: " + String.valueOf(characterY));
+//        }
+
+        // Collision detection is demonstrated as follows
+        /*
+         * |        |
+         * |        |
+         * |___C____|
+         *
+         *
+         */
+
+        Gdx.app.log("Test - Character: ","X is: " + String.valueOf(characterX) + " X2 is: " + String.valueOf(characterX + character_width));
+        Gdx.app.log("Test - Slime: ","X is: " + String.valueOf(slimeX) + " X2 is: " + String.valueOf(slimeX + 100));
+
+        int x = characterX;
+        int y = characterX + character_width;
+
+        int a = slimeX;
+        int b = slimeX + 100;
+        if ((slimeX >0) && ((y >= a + 40) && (y <= b))   ) {
+            Gdx.app.log("Hit!!! - Character: ","X is: " + String.valueOf(characterX) + " X2 is: " + String.valueOf(characterX + character_width));
+            Gdx.app.log("Hit!!! - Slime: ","X is: " + String.valueOf(slimeX) + " X2 is: " + String.valueOf(slimeX + 100));
+
+            state = "dead";
+            deathPosition = characterX;
+            currentFrame = deadFrames[0];
+        }
 
 
 
@@ -245,7 +327,7 @@ public class GameScreen implements Screen {
         spriteBatch.begin();
 
         // Moves the character and camera until the end of the tiledMap.
-        if (characterX <= 16400) {
+        if (characterX <= 16400 && state != "really dead") {
             characterX += 5;
             camera.translate(5,0);
         } else if (characterX >= 17500){
@@ -255,10 +337,13 @@ public class GameScreen implements Screen {
             game.setScreen(MyGdxGame.winningScreen);
 
         } else {
-            characterX += 5;
+            if (state != "really dead") {
+                characterX += 5;
+            }
         }
 
-        Gdx.app.log("State: ",String.valueOf(characterX));
+//        Gdx.app.log("Hit - Character: ","X is: " + String.valueOf(characterX) + "Y is: " + String.valueOf(characterY));
+//        Gdx.app.log("Hit - Slime: ","X is: " + String.valueOf(slimeX) + " Y is: " + String.valueOf(slimeY));
 
         spriteBatch.draw(currentFrame, characterX, characterY, character_width, character_height);
 
