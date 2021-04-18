@@ -22,6 +22,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 public class GameScreen implements Screen {
     MyGdxGame game;
     private Music backgroundMusic;                          // Background music while playing the game
+    private Sound jumpSound;
     SpriteBatch spriteBatch;                                // Spritebatch for rendering
 
     // Main character variables
@@ -90,6 +91,7 @@ public class GameScreen implements Screen {
 
         // Loaded the background music
         backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("background_music.mp3"));
+        jumpSound = Gdx.audio.newSound(Gdx.files.internal("bounce.mp3"));
 
         // Running character------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         // Loaded the runnning spritesheet
@@ -233,6 +235,7 @@ public class GameScreen implements Screen {
             state = "jump";
             currentFrame = jumpFrames[0];
             jumpStart = characterX;
+            jumpSound.play();
         }
         // before air
         if (state == "jump" && characterX == jumpStart + 15) {
